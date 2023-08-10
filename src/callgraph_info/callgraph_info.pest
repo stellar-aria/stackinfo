@@ -1,0 +1,16 @@
+object = { key ~ "{" ~ item* ~ "}" }
+item = { object | field }
+field = { key ~ value }
+key = _{ ident ~ ":" }
+value = _{ literal | string_literal }
+literal = _{ shape_type }
+shape_type = { "circle" | "rectangle" | "ellipse" }
+
+ident = { 'a'..'z'+ }
+
+string_literal = _{  quote ~ string ~ quote }
+string = { char* }
+char = _{ !"\"" ~ ANY }
+quote = _{ "\"" }
+
+WHITESPACE = _{ (" " | "\n" | "\r\n")+ }

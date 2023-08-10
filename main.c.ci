@@ -1,0 +1,49 @@
+graph: { title: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c"
+node: { title: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:clearIRQInterrupt" label: "clearIRQInterrupt\nC:/Users/Kate/GitHub/DelugeFirmware/src/main.c:48:13" }
+node: { title: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:int_irq6" label: "int_irq6\nC:/Users/Kate/GitHub/DelugeFirmware/src/main.c:55:13" }
+node: { title: "R_INTC_Disable" label: "R_INTC_Disable\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/intc/devdrv_intc.h:576:9" shape : ellipse }
+edge: { sourcename: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:int_irq6" targetname: "R_INTC_Disable" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:58:2" }
+edge: { sourcename: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:int_irq6" targetname: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:clearIRQInterrupt" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:66:2" }
+node: { title: "R_INTC_Enable" label: "R_INTC_Enable\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/intc/devdrv_intc.h:575:9" shape : ellipse }
+edge: { sourcename: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:int_irq6" targetname: "R_INTC_Enable" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:68:2" }
+node: { title: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:midiAndGateOutputTimerInterrupt" label: "midiAndGateOutputTimerInterrupt\nC:/Users/Kate/GitHub/DelugeFirmware/src/main.c:31:13" }
+edge: { sourcename: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:midiAndGateOutputTimerInterrupt" targetname: "R_INTC_Disable" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:37:2" }
+node: { title: "timerGoneOff" label: "timerGoneOff\nC:/Users/Kate/GitHub/DelugeFirmware/src/deluge/deluge.h:28:13" shape : ellipse }
+edge: { sourcename: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:midiAndGateOutputTimerInterrupt" targetname: "timerGoneOff" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:40:2" }
+node: { title: "main" label: "main\nC:/Users/Kate/GitHub/DelugeFirmware/src/main.c:80:5" }
+node: { title: "setPinMux" label: "setPinMux\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/gpio/gpio.h:23:6" shape : ellipse }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:83:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:84:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:85:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:86:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:87:2" }
+node: { title: "mtuEnableAccess" label: "mtuEnableAccess\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/mtu/mtu.h:47:13" shape : ellipse }
+edge: { sourcename: "main" targetname: "mtuEnableAccess" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:89:2" }
+node: { title: "R_INTC_RegistIntFunc" label: "R_INTC_RegistIntFunc\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/intc/devdrv_intc.h:573:9" shape : ellipse }
+edge: { sourcename: "main" targetname: "R_INTC_RegistIntFunc" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:99:2" }
+node: { title: "R_INTC_SetPriority" label: "R_INTC_SetPriority\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/intc/devdrv_intc.h:577:9" shape : ellipse }
+edge: { sourcename: "main" targetname: "R_INTC_SetPriority" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:100:2" }
+node: { title: "uartInit" label: "uartInit\nC:/Users/Kate/GitHub/DelugeFirmware/src/RZA1/uart/sio_char.h:68:6" shape : ellipse }
+edge: { sourcename: "main" targetname: "uartInit" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:125:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:131:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:132:2" }
+edge: { sourcename: "main" targetname: "uartInit" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:136:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:142:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:143:2" }
+node: { title: "initUartDMA" label: "initUartDMA\nC:/Users/Kate/GitHub/DelugeFirmware/src/deluge/drivers/uart/uart.h:48:13" shape : ellipse }
+edge: { sourcename: "main" targetname: "initUartDMA" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:146:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:149:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:150:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:151:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:152:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:153:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:154:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:155:2" }
+edge: { sourcename: "main" targetname: "setPinMux" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:156:2" }
+edge: { sourcename: "main" targetname: "R_INTC_Disable" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:161:2" }
+edge: { sourcename: "main" targetname: "R_INTC_RegistIntFunc" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:162:2" }
+edge: { sourcename: "main" targetname: "R_INTC_SetPriority" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:163:2" }
+edge: { sourcename: "main" targetname: "R_INTC_Enable" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:164:2" }
+node: { title: "deluge_main" label: "deluge_main\nC:/Users/Kate/GitHub/DelugeFirmware/src/deluge/deluge.h:26:16" shape : ellipse }
+edge: { sourcename: "main" targetname: "deluge_main" label: "C:/Users/Kate/GitHub/DelugeFirmware/src/main.c:166:2" }
+}

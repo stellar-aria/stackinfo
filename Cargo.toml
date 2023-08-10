@@ -1,0 +1,22 @@
+[package]
+name = "stackinfo"
+authors = ["Katherine Whitlock"]
+description = "Process and analyze GCC info"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bimap = "0.6.3"
+clap = { version = "4.3.21", features = ["derive"] }
+#cpp_demangle = {version = "0.4.2" , features = ["logging"] }
+cpp_demangle = {version = "0.4.2" , features = [] }
+from-pest = "0.3.2"
+glob = "0.3.1"
+indicatif = { version = "0.17.6", features = ['rayon'] }
+pest = "2.7.2"
+pest-ast = "0.3.4"
+pest_derive = "2.7.2"
+petgraph = "0.6.3"
+rayon = "1.7.0"
