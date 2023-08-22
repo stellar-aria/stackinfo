@@ -8,24 +8,24 @@ fn span_into_str(span: Span) -> &str {
 
 #[derive(Debug, Clone, FromPest)]
 #[pest_ast(rule(Rule::object))]
-pub struct Object {
-    #[pest_ast(inner(with(span_into_str), with(str::parse), with(Result::unwrap)))]
-    pub kind: String,
-    pub items: Vec<Item>,
+pub struct Object<'pest> {
+    #[pest_ast(inner(with(span_into_str)))]
+    pub kind: &'pest str,
+    pub items: Vec<Item<'pest>>,
 }
 
 #[derive(Debug, Clone, FromPest)]
 #[pest_ast(rule(Rule::item))]
-pub enum Item {
-    Object(Object),
-    Field(Field),
+pub enum Item<'pest> {
+    Object(Object<'pest>),
+    Field(Field<'pest>),
 }
 
 #[derive(Debug, Clone, FromPest)]
 #[pest_ast(rule(Rule::field))]
-pub struct Field {
-    #[pest_ast(inner(with(span_into_str), with(str::parse), with(Result::unwrap)))]
-    pub key: String,
-    #[pest_ast(inner(with(span_into_str), with(str::parse), with(Result::unwrap)))]
-    pub value: String,
+pub struct Field<'pest> {
+    #[pest_ast(inner(with(span_into_str)))]
+    pub key: &'pest str,
+    #[pest_ast(inner(with(span_into_str)))]
+    pub value: &'pest str,
 }

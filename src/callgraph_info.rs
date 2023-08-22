@@ -3,17 +3,19 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
 
-use bimap::{hash, BiMap, Overwritten};
+use bimap::BiMap;
 
 use cpp_demangle::Symbol;
 
 use pest::Parser;
-use petgraph::graph::{EdgeIndex, Edges, NodeIndex};
+
 use petgraph::graphmap::EdgesDirected;
-use petgraph::prelude::{DiGraphMap, GraphMap};
-use petgraph::{Directed, Direction, Graph};
+use petgraph::prelude::DiGraphMap;
+use petgraph::{Directed, Direction};
 
 use from_pest::FromPest;
+
+use crate::location::Location;
 
 mod ci {
     #[derive(pest_derive::Parser)]
@@ -21,9 +23,9 @@ mod ci {
     pub struct Parser;
 }
 
-pub mod ast;
+mod ast;
 
-fn get_object_map(items: Vec<ast::Item>) -> HashMap<String, String> {
+fn get_object_map(items: Vec<ast::Item>) -> HashMap<&str, &str> {
     items
         .into_iter()
         .filter_map(|i| match i {
@@ -47,72 +49,82 @@ fn maybe_demangle(string: &str) -> String {
     split_string.join(":")
 }
 
+type GraphIdx = u64;
+
 pub struct CallGraph {
-    pub graph: DiGraphMap<u64, String>,   // name reference, location
-    pub functions: BiMap<String, String>, // name, location
-    function_idx: BiMap<String, u64>,     // name, graph_idx
+    pub graph: DiGraphMap<GraphIdx, Option<Location>>, // name reference, location
+    pub locations: BiMap<GraphIdx, Option<Location>>, // graph_idx, location
+    pub functions: BiMap<GraphIdx, String>,   // graph_idx, name
     hasher: DefaultHasher,
 }
 
 impl CallGraph {
     pub fn new() -> CallGraph {
         CallGraph {
-            graph: DiGraphMap::<u64, String>::new(),
+            graph: DiGraphMap::<GraphIdx, Option<Location>>::new(),
+            locations: BiMap::new(),
             functions: BiMap::new(),
-            function_idx: BiMap::new(),
             hasher: DefaultHasher::new(),
         }
     }
 
     pub fn add_function(&mut self, name: &str, location: &str) {
         let name_string = name.to_string();
-        self.functions
-            .insert(name.to_string(), location.to_string());
-
         name_string.hash(&mut self.hasher);
+        let location = match Location::parse(location) {
+            Some((location, _)) => Some(location),
+            None => None,
+        };
         let hash_value = self.hasher.finish();
-        self.function_idx.insert(name_string, hash_value);
+
+        self.locations.insert(hash_value, location);
+        self.functions.insert( hash_value, name_string);
 
         self.graph.add_node(hash_value);
     }
 
     pub fn add_call(&mut self, from: &str, to: &str, location: &str) -> Result<(), String> {
         let from_idx = self
-            .function_idx
-            .get_by_left(from)
+            .functions
+            .get_by_right(from)
             .ok_or(format!("No such source found: '{}'", from))?;
 
         let to_idx = self
-            .function_idx
-            .get_by_left(to)
+            .functions
+            .get_by_right(to)
             .ok_or(format!("No such target found: '{}'", to))?;
 
-        self.graph
-            .add_edge(*from_idx, *to_idx, location.to_owned());
+        let location = match Location::parse(location) {
+            Some((loc, _)) => Some(loc),
+            None => None,
+        };
+
+        self.graph.add_edge(*from_idx, *to_idx, location);
 
         Ok(())
     }
 
-    pub fn get_location(&self, function: &str) -> &str {
-        self.functions.get_by_left(function).unwrap()
+    pub fn get_location(&self, function: &str) -> &Option<Location> {
+        let idx = self.functions.get_by_right(function).unwrap();
+        self.locations.get_by_left(idx).unwrap()
     }
 
-    pub fn get_name(&self, node: &str) -> String {
-        (*self.functions.get_by_right(node).unwrap()).to_string()
+    pub fn get_name(&self, loc: Location) -> &String {
+        let some_loc = Some(loc);
+        let idx = self.locations.get_by_right(&some_loc).unwrap();
+        self.functions.get_by_left(idx).unwrap()
     }
 
-    pub fn get_calls(&self, function: &str) -> EdgesDirected<'_, u64, String, Directed> {
-        let node_idx = self.function_idx.get_by_left(function).unwrap();
-        self.graph.edges_directed(*node_idx, Direction::Outgoing)
+    pub fn get_calls(&self, node_idx: GraphIdx) -> EdgesDirected<'_, u64, Option<Location>, Directed> {
+        self.graph.edges_directed(node_idx, Direction::Outgoing)
     }
 
-    pub fn get_callers(&self, function: &str) -> EdgesDirected<'_, u64, String, Directed> {
-        let node_idx = self.function_idx.get_by_left(function).unwrap();
-        self.graph.edges_directed(*node_idx, Direction::Incoming)
+    pub fn get_callers(&self, node_idx: GraphIdx) -> EdgesDirected<'_, u64, Option<Location>, Directed> {
+        self.graph.edges_directed(node_idx, Direction::Incoming)
     }
 
     pub fn parse_file(&mut self, path: &PathBuf) {
-        let data = std::fs::read_to_string(path.clone()).expect("Unable to read file");
+        let data = std::fs::read_to_string(path).expect("Unable to read file");
         let mut pairs =
             ci::Parser::parse(ci::Rule::object, &data).unwrap_or_else(|e| panic!("{}", e));
         let syntax_tree = ast::Object::from_pest(&mut pairs).unwrap_or_else(|e| panic!("{}", e));
@@ -122,7 +134,7 @@ impl CallGraph {
             items: graph_items,
         } = syntax_tree;
 
-        if graph_kind.as_str() != "graph" {
+        if graph_kind != "graph" {
             panic!(
                 "Error: file does not contain a graph at the toplevel {}",
                 path.display()
@@ -133,7 +145,7 @@ impl CallGraph {
             .clone()
             .into_iter()
             .filter_map(|item| match item {
-                ast::Item::Object(o) if o.kind.as_str() == "node" => Some(o),
+                ast::Item::Object(o) if o.kind == "node" => Some(o),
                 _ => None,
             })
             .collect();
@@ -141,20 +153,18 @@ impl CallGraph {
         let edges: Vec<ast::Object> = graph_items
             .into_iter()
             .filter_map(|item| match item {
-                ast::Item::Object(o) if o.kind.as_str() == "edge" => Some(o),
+                ast::Item::Object(o) if o.kind == "edge" => Some(o),
                 _ => None,
             })
             .collect();
 
         for node in nodes {
             let obj_map = get_object_map(node.items);
-            let labels: Vec<&str> = obj_map["label"].split("\\n").collect();
-            let label = match labels.get(1) {
-                Some(s) => s,
-                None => labels[0],
-            };
-            let name = maybe_demangle(&obj_map["title"]);
-            self.add_function(&name, label)
+            let title = obj_map["title"];
+            let label = obj_map["label"];
+            let location: &str = label.split("\\n").nth(1).unwrap_or(&label);
+            let name = maybe_demangle(title);
+            self.add_function(&name, location)
         }
 
         for edge in edges {
