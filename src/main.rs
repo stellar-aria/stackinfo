@@ -1,7 +1,6 @@
 use glob::glob;
-use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
+use indicatif::{ProgressBar, ProgressStyle};
 
-use indicatif::ParallelProgressIterator;
 use rayon::iter::ParallelIterator;
 
 use std::path::PathBuf;
@@ -34,14 +33,12 @@ fn main() -> Result<(), std::io::Error> {
     let ci_glob = path_str.clone() + "/**/*.ci";
     let callgraph_info_files: Vec<PathBuf> = glob(ci_glob.as_str())
         .expect("Failed to find callgraph-info files!")
-        .into_iter()
         .flatten()
         .collect();
 
     let su_glob = path_str.clone() + "/**/*.su";
     let stack_usage_files: Vec<PathBuf> = glob(su_glob.as_str())
         .expect("Failed to find any stack-usage files!")
-        .into_iter()
         .flatten()
         .collect();
 
@@ -65,17 +62,28 @@ fn main() -> Result<(), std::io::Error> {
     su_pb.set_style(sty);
     su_pb.set_message("Loading stack usage files... Done!");
 
-    let stack_usages: Vec<StackUsage> = stack_usage_files
+    let mut stack_usages: Vec<StackUsage> = stack_usage_files
         .iter()
-        .map(|path| {
+        .flat_map(|path| {
             su_pb.inc(1);
             let data = std::fs::read_to_string(path).expect("Unable to read file");
             data.lines().map(StackUsage::parse).collect::<Vec<_>>()
         })
-        .flatten()
         .collect();
 
     su_pb.finish_with_message("Loading stack usage files... Done!");
+
+    stack_usages.sort_unstable();
+    stack_usages.reverse();
+
+    println!("Top ten largest stack-using functions:");
+
+    for usage in stack_usages.iter().take(10) {
+        let stack = usage.stack_usage;
+        let function = &usage.function;
+        let name = &function.name;
+        println!("  ({stack}) {name}");
+    }
 
     Ok(())
 }

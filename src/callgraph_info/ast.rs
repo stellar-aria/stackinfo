@@ -2,7 +2,7 @@ use super::ci::Rule;
 use pest::Span;
 use pest_ast::FromPest;
 
-fn span_into_str(span: Span) -> &str {
+fn span_into_str(span: Span<'_>) -> &str {
     span.as_str()
 }
 

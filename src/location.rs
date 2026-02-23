@@ -9,17 +9,11 @@ pub struct Location {
 
 impl Location {
     pub fn parse(string: &str) -> Option<(Location, &str)> {
-        let (maybe_path, maybe_rest) = match string.split_once(':') {
-            Some(x) => x,
-            None => return None,
-        };
+        let (maybe_path, maybe_rest) = string.split_once(':')?;
         let (path, rest) = match maybe_path.len() {
             1 => {
                 // Windows has single-character drive letters followed by ':', so we have to handle that here
-                let (path_rest, rest) = match maybe_rest.split_once(':') {
-                    Some(x) => x,
-                    None => return None,
-                };
+                let (path_rest, rest) = maybe_rest.split_once(':')?;
                 (maybe_path.to_string() + ":" + path_rest, rest)
             }
             0 => return None,

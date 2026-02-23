@@ -25,7 +25,7 @@ mod ci {
 
 mod ast;
 
-fn get_object_map(items: Vec<ast::Item>) -> HashMap<&str, &str> {
+fn get_object_map(items: Vec<ast::Item<'_>>) -> HashMap<&str, &str> {
     items
         .into_iter()
         .filter_map(|i| match i {
@@ -71,10 +71,7 @@ impl CallGraph {
     pub fn add_function(&mut self, name: &str, location: &str) {
         let name_string = name.to_string();
         name_string.hash(&mut self.hasher);
-        let location = match Location::parse(location) {
-            Some((location, _)) => Some(location),
-            None => None,
-        };
+        let location = Location::parse(location).map(|(location, _)| location);
         let hash_value = self.hasher.finish();
 
         self.locations.insert(hash_value, location);
@@ -94,10 +91,7 @@ impl CallGraph {
             .get_by_right(to)
             .ok_or(format!("No such target found: '{}'", to))?;
 
-        let location = match Location::parse(location) {
-            Some((loc, _)) => Some(loc),
-            None => None,
-        };
+        let location = Location::parse(location).map(|(loc, _)| loc);
 
         self.graph.add_edge(*from_idx, *to_idx, location);
 
@@ -162,7 +156,7 @@ impl CallGraph {
             let obj_map = get_object_map(node.items);
             let title = obj_map["title"];
             let label = obj_map["label"];
-            let location: &str = label.split("\\n").nth(1).unwrap_or(&label);
+            let location: &str = label.split("\\n").nth(1).unwrap_or(label);
             let name = maybe_demangle(title);
             self.add_function(&name, location)
         }
@@ -173,8 +167,8 @@ impl CallGraph {
                 Some(l) => l,
                 None => "intrinsic",
             };
-            let source = maybe_demangle(&obj_map["sourcename"]);
-            let target = maybe_demangle(&obj_map["targetname"]);
+            let source = maybe_demangle(obj_map["sourcename"]);
+            let target = maybe_demangle(obj_map["targetname"]);
             let add = self.add_call(&source, &target, label);
             match add {
                 Ok(_) => (),

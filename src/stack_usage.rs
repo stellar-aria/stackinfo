@@ -9,8 +9,8 @@ pub enum Qualifier {
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct StackUsage {
-    pub function: Function,
     pub stack_usage: usize,
+    pub function: Function,
     pub qualifiers: Vec<Qualifier>,
 }
 
@@ -47,7 +47,6 @@ impl StackUsage {
         }
     }
 }
-
 
 impl Function {
     pub fn parse(string: &str) -> Function {
